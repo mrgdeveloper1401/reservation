@@ -31,6 +31,7 @@ ALLOWED_HOSTS = []
 # Application definition
 CREATEAPP = [
     'flight.apps.FlightConfig',
+    'core.apps.CoreConfig',
 ]
 
 INSTALLED_APPS = [
