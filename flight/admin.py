@@ -1,14 +1,22 @@
 from django.contrib import admin
-from .models import Flight, FlightDay
+from .models import Price,  AirLine, AirLineAttribute
 
-
-@admin.register(Flight)
-class FlightAdmin(admin.ModelAdmin):
-    prepopulated_fields = {'slug': ('origin', 'destination')}
-
-
-@admin.register(FlightDay)
-class FlightDayAdmin(admin.ModelAdmin):
-    pass    
-
+class AirLineAttributeInline(admin.TabularInline):
+    model = AirLineAttribute
+    extra = 0
     
+
+@admin.register(AirLine)
+class FlightDayAdmin(admin.ModelAdmin):
+    inlines = (AirLineAttributeInline,)
+    prepopulated_fields = {'slug': ('airline_name',)}
+
+
+@admin.register(Price)
+class PriceAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(AirLineAttribute)
+class AirLineAttribute(admin.ModelAdmin):
+    pass

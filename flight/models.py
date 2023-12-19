@@ -2,39 +2,33 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 
-class Flight(models.Model):
-    origin = models.CharField(_("مبدا"), max_length=50)
-    destination = models.CharField(_("مقصد"), max_length=100)
-    slug = models.SlugField(unique=True, allow_unicode=True)
-    departed_date = models.DateField(_("تاریخ پرواز"))
-    class Passenegrechose(models.TextChoices):
-        adult = _('بزرگسال')
-        child = _('کودک')
-        baby = _('نوزاد')
-    passenegre = models.CharField(_("تعداد مسافران"), max_length=7, choices=Passenegrechose.choices, default=Passenegrechose.adult)
-
-    def __str__(self) -> str:
-        return str(f'{self.origin} به {self.destination}')
-
-    class Meta:
-        db_table = "flight"
-        verbose_name = 'Flight'
-        verbose_name_plural = 'Flights'
-
 class AirLine(models.Model):
-    flight = models.ForeignKey(Flight, on_delete=models.PROTECT, related_name='airlines')
-    price = models.ForeignKey('Price', on_delete=models.PROTECT, related_name='airlines_price')
-    airline_name = models.CharField(max_length=64)
+    airline_name = models.CharField(_('نام شرکت هواپیما'), max_length=64)
     slug = models.SlugField(unique=True, allow_unicode=True)
-    airport_type = models.CharField()
-    allowed_cargo = models.PositiveSmallIntegerField()
-    airport_cabin = models.CharField()
-    airport_class = models.CharField()
+    airport_type = models.CharField(_('نوع هواپیما'), max_length=50)
+    allowed_cargo = models.PositiveSmallIntegerField(_('بار مجاز'))
+    airport_cabin = models.CharField(_('کابین'), max_length=50)
+    airport_class = models.CharField(_('کلاس نرخی'), max_length=50)
+    price = models.ForeignKey('Price', on_delete=models.PROTECT, related_name='airlines_price')
 
     class Meta:
         db_table = 'airline'
         verbose_name = 'AirLine'
         verbose_name_plural = 'AirLines'
+
+
+class AirLineAttribute(models.Model):
+    airline = models.ForeignKey(AirLine, on_delete=models.PROTECT, related_name='airline_attribute')
+    attribute = models.CharField(_('ويژگی'), max_length=50)
+    value_char = models.CharField(_('مقدار'), max_length=50)
+    value_text = models.CharField(_("مقدار متنی"), max_length=50)
+    value_datetime = models.DateTimeField(_('مقدار زمانی'))
+    
+    
+    class Meta:
+        db_table = 'airline attribute'
+        verbose_name = 'airline attribute'
+        verbose_name_plural = 'airline attributes'
 
 
 class Price(models.Model):
@@ -49,3 +43,8 @@ class Price(models.Model):
         db_table = 'price'
         verbose_name = 'Price'
         verbose_name_plural = 'Prices'
+
+
+
+class Ticket(models.Model):
+    pass
