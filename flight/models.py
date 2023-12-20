@@ -53,11 +53,11 @@ class Flight(CreateUpdate):
     slug = models.SlugField(unique=True, allow_unicode=True)
     flight_start_time = models.DateTimeField(_('ساعت پرواز'))
     flight_end_time = models.DateTimeField(_('ساعت فرود'))
-    status_flight = models.BooleanField(_("وضعیت پرواز"))
+    cacelled_flight = models.BooleanField(_('کنسل کردن پرواز'), default=False, editable=False)
     flight_number = CombindField(verbose_name='شماره پرواز', help_text='3 characters is air and 7 next characters is digits')
     
     def __str__(self) -> str:
-        return f'شرکت هواپیمایی {self.aairline.airline_name}پرواز از مبدا {self.origin} به مقصد {self.destination}'
+        return f'شرکت هواپیمایی {self.aairline.airline_name}, پرواز از مبدا {self.origin} به مقصد {self.destination}'
     
     class Meta:
         db_table = "flight"

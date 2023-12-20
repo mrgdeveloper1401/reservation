@@ -16,17 +16,18 @@ class PriceInline(admin.StackedInline):
 @admin.register(Flight)
 class FlightAdmin(admin.ModelAdmin):
     inlines = (FlightAttributeValueInline, PriceInline)
-    list_display = ('__str__', 'status_flight', 'flight_start_time', 'flight_end_time', 'origin', 'destination', 'flight_number')
+    list_display = ('__str__', 'cacelled_flight', 'flight_start_time', 'flight_end_time', 'origin', 'destination', 'flight_number')
     prepopulated_fields = {'slug': ('origin', 'destination')}
     search_fields = ('flight', 'flight_start_time', 'flight_end_time', 'origin', 'destination')
-    list_filter = ('status_flight', 'flight_end_time', 'flight_start_time', 'flght_path_choose')
-    actions = ('disable_status_flight', 'enable_status_flight')
+    list_filter = ('flight_end_time', 'flight_start_time', 'flght_path_choose', 'cacelled_flight')
+    # actions = ('disable_cacelled_flight', 'enable_cacelled_flight')
+    readonly_fields = ('cacelled_flight',)
     
-    def disable_status_flight(modeladmin, request, queryset):
-        queryset.update(status_flight=False)
+    # def disable_cacelled_flight(modeladmin, request, queryset):
+    #     queryset.update(cacelled_flight=False)
         
-    def enable_status_flight(modeladmin, request, queryset):
-        queryset.update(status_flight=True)
+    # def enable_cacelled_flight(modeladmin, request, queryset):
+    #     queryset.update(cacelled_flight=True)
         
 
 
