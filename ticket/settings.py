@@ -33,6 +33,8 @@ CREATEAPP = [
     'flight.apps.FlightConfig',
     'core.apps.CoreConfig',
     'accounts.apps.AccountsConfig',
+    'price.apps.PriceConfig',
+    'coupon_management',
 ]
 
 INSTALLED_APPS = [

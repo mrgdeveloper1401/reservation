@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import AirLine, FlightAttribute, Flight, Price, FlightAttributeValue
+from .models import AirLine, FlightAttribute, Flight, FlightAttributeValue
+from price.models import Price
 
 
 class FlightAttributeValueInline(admin.TabularInline):
@@ -15,7 +16,7 @@ class PriceInline(admin.StackedInline):
 @admin.register(Flight)
 class FlightAdmin(admin.ModelAdmin):
     inlines = (FlightAttributeValueInline, PriceInline)
-    list_display = ('__str__', 'status_flight', 'flight_start_time', 'flight_end_time', 'origin', 'destination')
+    list_display = ('__str__', 'status_flight', 'flight_start_time', 'flight_end_time', 'origin', 'destination', 'flight_number')
     prepopulated_fields = {'slug': ('origin', 'destination')}
     search_fields = ('flight', 'flight_start_time', 'flight_end_time', 'origin', 'destination')
     list_filter = ('status_flight', 'flight_end_time', 'flight_start_time', 'flght_path_choose')
@@ -46,16 +47,22 @@ class AirLineAdmin(admin.ModelAdmin):
 @admin.register(FlightAttribute)
 class FlightAttributeAdmin(admin.ModelAdmin):
     inlines = (FlightAttributeValueInline,)
-
+    list_display = ('attribute', 'create_at', 'update_at')
+    search_fields = ('attribute',)
+    list_filter = ('create_at', 'update_at')
+    actions = ('enable_value', 'disable_value')
+    
 
 @admin.register(FlightAttributeValue)
 class FlightAttributeValueAdmin(admin.ModelAdmin):
-    pass
-
-
-@admin.register(Price)
-class PriceAdmin(admin.ModelAdmin):
-    pass
-
-
+    list_display = ('__str__', 'is_public_value', 'create_at', 'update_at')
+    list_filter = ('create_at', 'update_at', 'is_public_value')
+    search_fields = ('attribute_value',)
+    actions = ('enable_value', 'disable_value')
     
+    def enable_value(self, request, queryset):
+        queryset.update(is_public_value=True)
+        
+    def disable_value(self, request, queryset):
+        queryset.update(is_public_value=False)
+

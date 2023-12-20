@@ -2,6 +2,7 @@ from decimal import Decimal
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from core.models import CreateUpdate
+from .fields import CombindField
 
 
 class AirLine(CreateUpdate):
@@ -46,14 +47,15 @@ class Flight(CreateUpdate):
         one_way = 'wan way', _('یک طرفه')
         back_and_forth = 'back and forth', _('رفت و برگشت')
     flght_path_choose = models.CharField(_(' مسیر پرواز'), max_length=14, choices=FlightPath.choices)
-    aairline = models.ForeignKey(AirLine, on_delete=models.PROTECT,related_name = 'flights', verbose_name='پرواز')
+    aairline = models.ForeignKey(AirLine, on_delete=models.PROTECT,related_name = 'flights', verbose_name='شرکت هواپیمایی')
     origin = models.CharField(_('مبدا'), max_length=50)
     destination = models.CharField(_('مقصد'), max_length=50)
     slug = models.SlugField(unique=True, allow_unicode=True)
     flight_start_time = models.DateTimeField(_('ساعت پرواز'))
     flight_end_time = models.DateTimeField(_('ساعت فرود'))
     status_flight = models.BooleanField(_("وضعیت پرواز"))
-
+    flight_number = CombindField(verbose_name='شماره پرواز', help_text='3 characters is air and 7 next characters is digits')
+    
     def __str__(self) -> str:
         return f'شرکت هواپیمایی {self.aairline.airline_name}پرواز از مبدا {self.origin} به مقصد {self.destination}'
     
@@ -79,6 +81,7 @@ class FlightAttributeValue(CreateUpdate):
     attribute = models.ForeignKey(FlightAttribute, on_delete=models.PROTECT, related_name='attributes')
     flight = models.ForeignKey(Flight, on_delete=models.PROTECT, related_name='flight_attribute_values')
     atribute_value = models.CharField(_('مقدار ويژگی'),  max_length=100)
+    is_public_value = models.BooleanField(_('وضعیت انتشار مقدار'), default=True)
     
     def __str__(self) -> str:
         return f'{self.attribute.attribute} -- {self.atribute_value}'
@@ -87,54 +90,3 @@ class FlightAttributeValue(CreateUpdate):
         db_table = "flight_attribute_value"        
         verbose_name = 'FlightAttributeValue'
         verbose_name_plural = 'FlightAttributeValues'
-    
-
-class Dicount(models.Model):
-    # user
-    # price
-    # uuid
-    pass
-
-
-class Price(CreateUpdate):
-    ADULT = 'adult'
-    CHILD = 'child'
-    BABY = 'baby'
-    PASSENGER_TYPES = [
-        (ADULT, _('بزرگسال')),
-        (CHILD, _('کودک')),
-        (BABY, _('نوزاد')),
-    ]
-
-    flight = models.ForeignKey(Flight, on_delete=models.PROTECT, related_name='prices')
-    passenger_type = models.CharField(_('نوع مسافر'), max_length=10, choices=PASSENGER_TYPES)
-    passenegr_number = models.PositiveSmallIntegerField(_('تعداد مسافران'), default=0)
-    basic_price = models.DecimalField(_("قیمت پایه"), max_digits=15, decimal_places=3)
-    taxes_and_duties = models.DecimalField(_("مالیات و عوارض"), max_digits=15, decimal_places=3, blank=True, null=True)
-    taxes_and_services = models.DecimalField(_("مالیات و خدمات"), max_digits=15, decimal_places=3, blank=True, null=True)
-    value_added_tax = models.DecimalField(_("مالیات بر ارزش افزوده"), max_digits=15, decimal_places=3, blank=True, null=True)
-    discount = models.DecimalField(_('تخفیف'), max_digits=15, decimal_places=5,  blank=True, null=True)
-
-    @property
-    def calculate_texes_and_duties(self):
-        if self.passenger_type == 'adult':
-            texes = Decimal(self.basic_price /  Decimal(9.2))
-            round_texes = round(texes, 3)
-            return round_texes
-        elif self.passenger_type == 'child':
-            texes = (Decimal(self.basic_price /  Decimal(8.8)))
-            round_texes = round(texes, 3)
-            return round_texes
-        else:
-            texes = Decimal(self.basic_price / Decimal(6.5))
-            round_texes = round(texes, 3)
-            return round_texes
-        
-    def save(self, *args, **kwargs):
-        self.texes_and_duties = self.calculate_texes_and_duties
-        super().save(*args, **kwargs)
-
-    class Meta:
-        db_table = 'price'
-        verbose_name = 'Price'
-        verbose_name_plural = 'Prices'
