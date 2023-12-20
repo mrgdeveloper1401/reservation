@@ -35,6 +35,7 @@ CREATEAPP = [
     'accounts.apps.AccountsConfig',
     'price.apps.PriceConfig',
     'coupon_management',
+    'tickets.apps.TicketsConfig',
 ]
 
 INSTALLED_APPS = [
