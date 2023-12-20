@@ -18,7 +18,7 @@ class FlightAdmin(admin.ModelAdmin):
     list_display = ('__str__', 'status_flight', 'flight_start_time', 'flight_end_time', 'origin', 'destination')
     prepopulated_fields = {'slug': ('origin', 'destination')}
     search_fields = ('flight', 'flight_start_time', 'flight_end_time', 'origin', 'destination')
-    list_filter = ('status_flight', 'flight_end_time', 'flight_start_time')
+    list_filter = ('status_flight', 'flight_end_time', 'flight_start_time', 'flght_path_choose')
     actions = ('disable_status_flight', 'enable_status_flight')
     
     def disable_status_flight(modeladmin, request, queryset):

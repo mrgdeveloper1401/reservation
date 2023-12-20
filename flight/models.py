@@ -1,3 +1,4 @@
+from decimal import Decimal
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from core.models import CreateUpdate
@@ -16,18 +17,21 @@ class AirLine(CreateUpdate):
     class ClassCabin(models.TextChoices):
         # Economy or economy class is known as the normal class of travel.
         Economy =  'Economy', _('کلاس اقتصادی')
+        Premuir_Economy = 'Premier Economy ', _('کلاس اقتصادی پریمیوم')
         # Business class has larger travel space, more comfortable seats, and more advanced services.
         Business = 'Business', _('کلاس کسب و کار')
+        Business_Premuir = 'Business_Premuir', _('کلاس بیزینس پریمیر')
         # First class is the highest level of travel on some planes.
         # This class often features private travel space, luxury bedding, high quality menus, and personalized service.
-        First = 'First',  _('کلاس اول')
-    class_cabin_choose = models.CharField(_('کلاس هواپیما'), max_length=8, choices=ClassCabin.choices, default=ClassCabin.Economy)
+        First = 'First',  _('کلاس فرست')
+        First_Premier = 'First_Premier', _('کلاس فرست پریمیر')
+    class_cabin_choose = models.CharField(_('کلاس هواپیما'), max_length=16, choices=ClassCabin.choices, default=ClassCabin.Economy)
     
     class AirlineRate(models.TextChoices):
         special = 'scpecial', _('نرخ ويژه')
         normal = 'normal', _('نرخ عادی')
     airline_rate_choose = models.CharField(_('نوع نرخ هواپیما'), max_length=8, choices=AirlineRate.choices, default=AirlineRate.normal)
-    
+        
     def __str__(self) -> str:
         return self.airline_name
     
@@ -38,6 +42,10 @@ class AirLine(CreateUpdate):
 
 
 class Flight(CreateUpdate):
+    class FlightPath(models.TextChoices):
+        one_way = 'wan way', _('یک طرفه')
+        back_and_forth = 'back and forth', _('رفت و برگشت')
+    flght_path_choose = models.CharField(_(' مسیر پرواز'), max_length=14, choices=FlightPath.choices)
     aairline = models.ForeignKey(AirLine, on_delete=models.PROTECT,related_name = 'flights', verbose_name='پرواز')
     origin = models.CharField(_('مبدا'), max_length=50)
     destination = models.CharField(_('مقصد'), max_length=50)
@@ -80,7 +88,14 @@ class FlightAttributeValue(CreateUpdate):
         verbose_name = 'FlightAttributeValue'
         verbose_name_plural = 'FlightAttributeValues'
     
-    
+
+class Dicount(models.Model):
+    # user
+    # price
+    # uuid
+    pass
+
+
 class Price(CreateUpdate):
     ADULT = 'adult'
     CHILD = 'child'
@@ -99,6 +114,25 @@ class Price(CreateUpdate):
     taxes_and_services = models.DecimalField(_("مالیات و خدمات"), max_digits=15, decimal_places=3, blank=True, null=True)
     value_added_tax = models.DecimalField(_("مالیات بر ارزش افزوده"), max_digits=15, decimal_places=3, blank=True, null=True)
     discount = models.DecimalField(_('تخفیف'), max_digits=15, decimal_places=5,  blank=True, null=True)
+
+    @property
+    def calculate_texes_and_duties(self):
+        if self.passenger_type == 'adult':
+            texes = Decimal(self.basic_price /  Decimal(9.2))
+            round_texes = round(texes, 3)
+            return round_texes
+        elif self.passenger_type == 'child':
+            texes = (Decimal(self.basic_price /  Decimal(8.8)))
+            round_texes = round(texes, 3)
+            return round_texes
+        else:
+            texes = Decimal(self.basic_price / Decimal(6.5))
+            round_texes = round(texes, 3)
+            return round_texes
+        
+    def save(self, *args, **kwargs):
+        self.texes_and_duties = self.calculate_texes_and_duties
+        super().save(*args, **kwargs)
 
     class Meta:
         db_table = 'price'
